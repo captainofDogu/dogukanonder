@@ -3,15 +3,22 @@ import { Link } from 'react-router-dom'
 import { useSelector } from 'react-redux';
 import { logOut,auth } from '../firebase';
 import { logout as logoutHandle } from '../store/auth';
+import { addTodo } from '../firebase';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { EmailVerification } from '../firebase';
+import { useState } from 'react';
+import todos from '../store/todos';
 
 const Home = () => {
 
   const navigate = useNavigate()
   const { user } = useSelector(state => state.auth)
   const dispatch = useDispatch()
+  const { todos } = useSelector(state => state.todos)
+  console.log(todos.map(todo => todo))
+
+  const [todo, setTodo] = useState('')
 
   const handleLogout = async () => {
     await logOut()
@@ -20,6 +27,15 @@ const Home = () => {
       replace:true
     })
     
+
+}
+
+const submitHandle = async (e) => {
+  e.preventDefault()
+  await addTodo({
+    todo,
+    uid:user.uid
+  })
 
 }
 
@@ -45,6 +61,16 @@ if(user){
           Email Güncelle
         </button>}
       </h1>
+      <form onSubmit={submitHandle} className='flex gap-x-4'>
+          <div className=' items-center justify-between fle'> 
+          <input onChange={e => setTodo(e.target.value)} value={todo} className='shadow-sm h-10 focus:ring-indigo-500 block bg-gray-300 w-full focus:border-indigo-500 sm:text-sm border-gray-500 rounded-full text-white ' placeholder='Todo yaz ' type="text"></input>
+        <button className='w-full h-10 /12 mx-auto items-center justify-center cursor-pointer inline-flex item-center px-4 py-2 border border-transparent text-white mt-2 bg-zinc-500 rounded-full hover:bg-neutral-800'>Ekle</button>
+
+          </div>
+      </form>
+      <ul className='mt-4'>
+          {todos.map((todo,index) => (<li key={index}>{todo.todo}</li>))}
+      </ul>
       
     </div>
   )

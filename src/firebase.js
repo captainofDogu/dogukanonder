@@ -7,6 +7,8 @@ import { login as loginHandle,logout as LogoutHandle } from "./store/auth";
 import { openModal } from "./store/modal";
 import { getFirestore } from "firebase/firestore";
 import { collection, addDoc } from "firebase/firestore"; 
+import { onSnapshot,doc } from "firebase/firestore";
+import { setTodos } from "./store/todos";
 
 
 
@@ -26,6 +28,18 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth()
 
 export const db = getFirestore(app) 
+// her bi veriyi veri tabanında alıyoruz ve redux a gönderiyoruz   
+
+onSnapshot(collection(db, "todos"), (doc) => {
+    console.log(doc.docs)
+    console.log(doc.docs.map((todo) => todo.id))
+     store.dispatch(setTodos(
+        doc.docs.reduce((todos,todo) => [...todos, { ...todo.data(), id:todo.id }],[]) // todo.data() bütün veriler geliyor 
+    ))
+    
+    //store.dispatch(setTodos(doc.docs))
+    //console.log("Current data: ", doc.docs);
+});
 
 export const addTodo = async (data) => {
   const result = await addDoc(collection(db,'todos'),data)
