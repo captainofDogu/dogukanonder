@@ -5,6 +5,9 @@ import { onAuthStateChanged } from "firebase/auth";
 import store from "./store";
 import { login as loginHandle,logout as LogoutHandle } from "./store/auth";
 import { openModal } from "./store/modal";
+import { getFirestore } from "firebase/firestore";
+import { collection, addDoc } from "firebase/firestore"; 
+
 
 
 
@@ -21,6 +24,13 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth()
+
+export const db = getFirestore(app) 
+
+export const addTodo = async (data) => {
+  const result = await addDoc(collection(db,'todos'),data)
+  console.log(result)
+}
 
 export const register = async (email,password) => {
 

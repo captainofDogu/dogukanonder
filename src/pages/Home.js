@@ -5,7 +5,6 @@ import { logOut,auth } from '../firebase';
 import { logout as logoutHandle } from '../store/auth';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import UpdateProfile from '../components/UpdateProfile';
 import { EmailVerification } from '../firebase';
 
 const Home = () => {
@@ -37,16 +36,15 @@ if(user){
       <h1 className='gap-x-4 flex items-center'>
       oturumun açık Hoşgeldin ( {user.email} )
       
-
-        <button onClick={handleLogout} className='h-10 rounded px-4 text-sm text-white bg-indigo-500'>
-          çıkış yap
+        <Link to="/settings" className='h-10 rounded px-4 text-sm text-white bg-indigo-500 items-center pt-2 hover:bg-black justify-items-center'>Ayarlar </Link>
+        <button onClick={handleLogout} className='h-10 hover:bg-black rounded px-4 text-sm text-white bg-indigo-500'>
+          Çıkış Yap
         </button>
         {!user.emailVerified && 
             <button onClick={handleVerification} className='h-10 rounded px-4 text-sm text-white bg-indigo-500'>
           Email Güncelle
         </button>}
       </h1>
-      <UpdateProfile />
       
     </div>
   )
