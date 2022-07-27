@@ -1,7 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { useSelector } from 'react-redux';
-import { logOut,auth } from '../firebase';
+import { logOut,auth, deleteTodo } from '../firebase';
 import { logout as logoutHandle } from '../store/auth';
 import { addTodo } from '../firebase';
 import { useDispatch } from 'react-redux';
@@ -44,10 +44,18 @@ const handleVerification = async () => {
   return true
 }
 
+const handleDelete = async  (id) => {
+  
+  await deleteTodo(id)
+
+}
+
 if(user){
   return (
     <div className='max-w-xl mx-auto py-5 '>
-      {user.photoURL && <img src={auth.currentUser.photoURL ? auth.currentUser.photoURL : ''} className="w-10 h-10 rounded-full" /> }
+            {!user.photoURL && <img src='https://abs.twimg.com/sticky/default_profile_images/default_profile_400x400.png' className="w-10 h-10 rounded-full" /> }
+
+      {user.photoURL && <img src={!auth.currentUser.photoURL ? auth.currentUser.photoURL : ''} className="w-10 h-10 rounded-full" /> }
       <h2>{auth.currentUser.displayName}</h2> 
       <h1 className='gap-x-4 flex items-center'>
       oturumun açık Hoşgeldin ( {user.email} )
@@ -68,10 +76,15 @@ if(user){
 
           </div>
       </form>
-      <ul className='mt-4'>
-          {todos.map((todo,index) => (<li key={index}>{todo.todo}</li>))}
-      </ul>
-      
+      {todos.length > 0 && (
+              <ul className='mt-4 gap-y-2 mt-4 flex flex-col'>
+              {todos.map((todo,index) => (<li className='flex h-max text-md  justify-between items-center rounded bg-indigo-200' key={index}>{todo.todo}
+              <button onClick={() => handleDelete(todo.id)} className='h-7rounded px-3 text-xs bg-indigo-700 text-white'>Sil</button>
+    
+              </li>))}
+          </ul>
+      )}
+      {todos.length === 0 && <h1>hiç todo eklemediniz</h1>}
     </div>
   )
 }

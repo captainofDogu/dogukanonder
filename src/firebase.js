@@ -5,8 +5,8 @@ import { onAuthStateChanged } from "firebase/auth";
 import store from "./store";
 import { login as loginHandle,logout as LogoutHandle } from "./store/auth";
 import { openModal } from "./store/modal";
-import { getFirestore } from "firebase/firestore";
-import { collection, addDoc } from "firebase/firestore"; 
+import { getFirestore, query } from "firebase/firestore";
+import { collection, addDoc,where ,deleteDoc} from "firebase/firestore"; 
 import { onSnapshot,doc } from "firebase/firestore";
 import { setTodos } from "./store/todos";
 
@@ -32,9 +32,9 @@ export const db = getFirestore(app)
 
 onSnapshot(collection(db, "todos"), (doc) => {
     console.log(doc.docs)
-    console.log(doc.docs.map((todo) => todo.id))
+    //console.log(doc.docs.reduce((todos,todo)=> [...todos,{...todo.data(),id:todo.id}] ,[])) // yavaş yavaş dizinin içine giriyorum önce array sonra obje 
      store.dispatch(setTodos(
-        doc.docs.reduce((todos,todo) => [...todos, { ...todo.data(), id:todo.id }],[]) // todo.data() bütün veriler geliyor 
+        doc.docs.reduce((todos,todo) =>[...todos, { ...todo.data(), id:todo.id }],[]) // todo.data() bütün veriler geliyor 
     ))
     
     //store.dispatch(setTodos(doc.docs))
@@ -42,9 +42,25 @@ onSnapshot(collection(db, "todos"), (doc) => {
 });
 
 export const addTodo = async (data) => {
-  const result = await addDoc(collection(db,'todos'),data)
-  console.log(result)
+    try {
+        const result = await addDoc(collection(db,'todos'),data)
+        console.log(result)
+        return result.id
+    } catch (error) {
+        toast.error(error.message)
+        
+    }
 }
+
+export const deleteTodo = async (id) => {
+    try {
+        return await deleteDoc(doc(db,'todos',id))
+    } catch (error) {
+        toast.error(error.message)
+    }
+}
+
+
 
 export const register = async (email,password) => {
 
@@ -119,6 +135,12 @@ export const EmailVerification = async () => {
 // bu methodda user geliyor  yani giriş yapan kullanıcı
 onAuthStateChanged(auth, (user) => { // giriş yaptık mesela sonra foto değiştirdik anlık olarak ekranda değiştiricez o zaman kullanabiliriz 
   if (user) {
+      // oturum açan kullanıcı sadece kendi todo larını görücek
+      onSnapshot(query(collection(db,'todos'),where('uid','==',auth.currentUser.uid)),(doc) => {
+          store.dispatch(setTodos(
+              doc.docs.reduce((todos,todo) =>[...todos, { ...todo.data(), id:todo.id }],[])
+          ))
+      })
       console.log(user)
     store.dispatch(loginHandle({
         displayName:user.displayName,
